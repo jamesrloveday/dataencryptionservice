@@ -5,19 +5,17 @@
  */
 package com.application.encryption.controller;
 
+
 import com.application.encryption.encryption.AES;
 import com.application.encryption.exceptions.FieldMissingException;
-import com.application.encryption.exceptions.ObjectEncryptionException;
-import com.application.encryption.model.User;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  * @author james
  *
- * Class Encryptor encrypts user data and returns a user with the fields encrypted
+ * Class Encryptor encrypts a String and returns the encrypted string
  *
  *
  */
@@ -26,47 +24,24 @@ public class Encryptor extends AbstractCipher {
     private static final Logger LOG = Logger.getLogger("EncryptorLogger");
 
     /**
-     * Method encryptUserData takes a user object and encrypts each field according to the secret key, then
-     * returning a user where each field is encrypted.
+     * Method ecryptStringVal
      *
-     * @param incomingUser
-     * @param key
-     * @return A User object where each field is encrypted
-     * @throws ObjectEncryptionException
+     * @param s the input string value to encrypt
+     * @param key the secret key to use or null
+     * @return String in encrypted format
      * @throws FieldMissingException
      */
-    public User encryptUserData(User incomingUser,
-                                           String key)
-            throws ObjectEncryptionException, FieldMissingException {
-        LOG.info("Starting user details encryption");
-
+    public String encryptStringVal(String s, String key) throws FieldMissingException {
         if(key == null) {
-            key = this.secretKey;
+            key = secretKey;
         }
-
-        User user;
-        if(incomingUser == null) {
-            LOG.info("User is null nothing to encrypt");
-            throw new ObjectEncryptionException("Cannot encrypt null data");
-        } else {
-            user = incomingUser;
-        }
+        LOG.info("Attempting to encrypt a string: " + s);
 
         try {
-            user.username = AES.encrypt(incomingUser.username, key);
-            user.password = AES.encrypt(incomingUser.password, key);
-            user.email = AES.encrypt(incomingUser.email, key);
+            return AES.encrypt(s, key);
         } catch(FieldMissingException ex) {
-            LOG.log(Level.INFO, "Attempt to encrypt the user has failed a field is missing " +
-            user.toString(), ex);
+            LOG.log(Level.INFO, "Attempt to encrypt the user has failed a field is missing", ex);
             throw new FieldMissingException(ex);
-        } catch(Exception ex) {
-            LOG.log(Level.INFO, "An exception condition has occurred: ", ex);
-            throw new ObjectEncryptionException(ex);
         }
-        LOG.info("User encryption is complete returning to caller");
-        return user;
     }
-
-
 }
